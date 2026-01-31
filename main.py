@@ -72,26 +72,26 @@ async def end_chat_after_time(user1, user2, context):
 
     if user1 in active_chats and user2 in active_chats:
         keyboard = [
-    ["💬 ₹29 – 30 minutes"],
-    ["💬 ₹59 – 60 minutes"],
-    ["❌ End chat"]
-]
+            ["💬 ₹29 – 30 minutes"],
+            ["💬 ₹59 – 60 minutes"],
+            ["❌ End chat"]
+        ]
 
-reply_markup = ReplyKeyboardMarkup(keyboard, resize_keyboard=True)
+        reply_markup = ReplyKeyboardMarkup(keyboard, resize_keyboard=True)
 
-await context.bot.send_message(
-    user1,
-    "⏰ Free session ended.\n\nWould you like to continue chatting?",
-    reply_markup=reply_markup
-)
+        await context.bot.send_message(
+            user1,
+            "⏰ Free session ended.\n\nWould you like to continue chatting?",
+            reply_markup=reply_markup
+        )
 
-await context.bot.send_message(
-    user2,
-    "⏰ Free session ended.\n\nWould you like to continue chatting?",
-    reply_markup=reply_markup
-)
+        await context.bot.send_message(
+            user2,
+            "⏰ Free session ended.\n\nWould you like to continue chatting?",
+            reply_markup=reply_markup
+        )
 
-end_chat(user1, user2)
+    end_chat(user1, user2)
 
 
 async def relay_messages(update: Update, context: ContextTypes.DEFAULT_TYPE):
