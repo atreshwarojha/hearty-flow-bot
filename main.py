@@ -3,7 +3,12 @@ from telegram.ext import ApplicationBuilder, CommandHandler, MessageHandler, Con
 
 BOT_TOKEN = "8335740705:AAFeYZinoZ3rN-_l1rW7y4DUsyWJzhvhcLI"
 
+# In-memory storage (temporary)
+users = {}
+
 async def start(update: Update, context: ContextTypes.DEFAULT_TYPE):
+    user_id = update.effective_user.id
+
     keyboard = [
         ["👦 Male", "👧 Female"]
     ]
@@ -19,18 +24,42 @@ async def start(update: Update, context: ContextTypes.DEFAULT_TYPE):
     )
 
 async def handle_gender(update: Update, context: ContextTypes.DEFAULT_TYPE):
-    gender = update.message.text
+    user_id = update.effective_user.id
+    text = update.message.text
 
-    if gender == "👦 Male":
-        await update.message.reply_text("Thanks! You selected Male ✅")
-    elif gender == "👧 Female":
-        await update.message.reply_text("Thanks! You selected Female ✅")
-    else:
-        await update.message.reply_text("Please choose from the buttons 🙂")
+    if text not in ["👦 Male", "👧 Female"]:
+        await update.message.reply_text("Please select gender using the buttons 🙂")
+        return
+
+    gender = "male" if "Male" in text else "female"
+
+    users[user_id] = {
+        "gender": gender,
+        "status": "idle"
+    }
+
+    await update.message.reply_text(
+        f"✅ Gender saved!\nYou selected: {gender.capitalize()}\n\nTap below when you're ready.",
+        reply_markup=ReplyKeyboardMarkup(
+            [["🔍 Find a chat partner"]],
+            resize_keyboard=True
+        )
+    )
+
+async def find_match(update: Update, context: ContextTypes.DEFAULT_TYPE):
+    user_id = update.effective_user.id
+
+    if user_id not in users:
+        await update.message.reply_text("Please start again using /start")
+        return
+
+    users[user_id]["status"] = "searching"
+    await update.message.reply_text("🔍 Searching for a chat partner...")
 
 app = ApplicationBuilder().token(BOT_TOKEN).build()
 
 app.add_handler(CommandHandler("start", start))
-app.add_handler(MessageHandler(filters.TEXT & ~filters.COMMAND, handle_gender))
+app.add_handler(MessageHandler(filters.TEXT & filters.Regex("^(👦 Male|👧 Female)$"), handle_gender))
+app.add_handler(MessageHandler(filters.TEXT & filters.Regex("^🔍 Find a chat partner$"), find_match))
 
 app.run_polling()
