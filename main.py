@@ -71,10 +71,28 @@ async def end_chat_after_time(user1, user2, context):
     await asyncio.sleep(FREE_CHAT_DURATION)
 
     if user1 in active_chats and user2 in active_chats:
-        await context.bot.send_message(user1, "⏰ Free session ended.\nThanks for chatting 💙")
-        await context.bot.send_message(user2, "⏰ Free session ended.\nThanks for chatting 💙")
+        keyboard = [
+    ["💬 ₹29 – 30 minutes"],
+    ["💬 ₹59 – 60 minutes"],
+    ["❌ End chat"]
+]
 
-        end_chat(user1, user2)
+reply_markup = ReplyKeyboardMarkup(keyboard, resize_keyboard=True)
+
+await context.bot.send_message(
+    user1,
+    "⏰ Free session ended.\n\nWould you like to continue chatting?",
+    reply_markup=reply_markup
+)
+
+await context.bot.send_message(
+    user2,
+    "⏰ Free session ended.\n\nWould you like to continue chatting?",
+    reply_markup=reply_markup
+)
+
+end_chat(user1, user2)
+
 
 async def relay_messages(update: Update, context: ContextTypes.DEFAULT_TYPE):
     user_id = update.effective_user.id
@@ -96,6 +114,13 @@ app = ApplicationBuilder().token(BOT_TOKEN).build()
 app.add_handler(CommandHandler("start", start))
 app.add_handler(MessageHandler(filters.Regex("^(👦 Male|👧 Female)$"), handle_gender))
 app.add_handler(MessageHandler(filters.Regex("^🔍 Find a chat partner$"), find_match))
+app.add_handler(
+    MessageHandler(
+        filters.Regex("^(💬 ₹29 – 30 minutes|💬 ₹59 – 60 minutes|❌ End chat)$"),
+        handle_paid_choice
+    )
+)
 app.add_handler(MessageHandler(filters.TEXT & ~filters.COMMAND, relay_messages))
+
 
 app.run_polling()
