@@ -124,3 +124,5 @@ app.add_handler(MessageHandler(filters.TEXT & ~filters.COMMAND, relay_messages))
 
 
 app.run_polling()
+if __name__ == "__main__":
+    app.run_polling()
