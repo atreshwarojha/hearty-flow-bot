@@ -1,57 +1,40 @@
+import asyncio
 from telegram import Update, ReplyKeyboardMarkup
 from telegram.ext import ApplicationBuilder, CommandHandler, MessageHandler, ContextTypes, filters
 
-BOT_TOKEN = "8335740705:AAFeYZinoZ3rN-_l1rW7y4DUsyWJzhvhcLI"
+BOT_TOKEN = ""
 
-# In-memory storage
 users = {}
 waiting_males = []
 waiting_females = []
 active_chats = {}
 
+FREE_CHAT_DURATION = 30  # 30 minutes in seconds
+
 async def start(update: Update, context: ContextTypes.DEFAULT_TYPE):
     keyboard = [["👦 Male", "👧 Female"]]
-    reply_markup = ReplyKeyboardMarkup(keyboard, one_time_keyboard=True, resize_keyboard=True)
-
     await update.message.reply_text(
         "Hello 👋\n\nWelcome to Lonely Talks Bot 💙\n\nPlease select your gender:",
-        reply_markup=reply_markup
+        reply_markup=ReplyKeyboardMarkup(keyboard, one_time_keyboard=True, resize_keyboard=True)
     )
 
 async def handle_gender(update: Update, context: ContextTypes.DEFAULT_TYPE):
     user_id = update.effective_user.id
     text = update.message.text
 
-    if text not in ["👦 Male", "👧 Female"]:
-        await update.message.reply_text("Please choose using buttons 🙂")
-        return
-
     gender = "male" if "Male" in text else "female"
-
-    users[user_id] = {
-        "gender": gender,
-        "status": "idle"
-    }
+    users[user_id] = {"gender": gender, "status": "idle"}
 
     await update.message.reply_text(
         "✅ Gender saved.\n\nTap below to find a chat partner.",
-        reply_markup=ReplyKeyboardMarkup(
-            [["🔍 Find a chat partner"]],
-            resize_keyboard=True
-        )
+        reply_markup=ReplyKeyboardMarkup([["🔍 Find a chat partner"]], resize_keyboard=True)
     )
 
 async def find_match(update: Update, context: ContextTypes.DEFAULT_TYPE):
     user_id = update.effective_user.id
-
-    if user_id not in users:
-        await update.message.reply_text("Please use /start first.")
-        return
-
     gender = users[user_id]["gender"]
 
     if users[user_id]["status"] == "chatting":
-        await update.message.reply_text("You are already in a chat.")
         return
 
     if gender == "male":
@@ -78,14 +61,20 @@ async def start_chat(user1, user2, context):
     active_chats[user1] = user2
     active_chats[user2] = user1
 
-    await context.bot.send_message(
-        chat_id=user1,
-        text="💬 You are now connected!\nSay hi 👋"
-    )
-    await context.bot.send_message(
-        chat_id=user2,
-        text="💬 You are now connected!\nSay hi 👋"
-    )
+    await context.bot.send_message(user1, "💬 You are now connected!\n⏱ Free chat started (30 minutes)")
+    await context.bot.send_message(user2, "💬 You are now connected!\n⏱ Free chat started (30 minutes)")
+
+    # Start timer
+    asyncio.create_task(end_chat_after_time(user1, user2, context))
+
+async def end_chat_after_time(user1, user2, context):
+    await asyncio.sleep(FREE_CHAT_DURATION)
+
+    if user1 in active_chats and user2 in active_chats:
+        await context.bot.send_message(user1, "⏰ Free session ended.\nThanks for chatting 💙")
+        await context.bot.send_message(user2, "⏰ Free session ended.\nThanks for chatting 💙")
+
+        end_chat(user1, user2)
 
 async def relay_messages(update: Update, context: ContextTypes.DEFAULT_TYPE):
     user_id = update.effective_user.id
@@ -93,7 +82,14 @@ async def relay_messages(update: Update, context: ContextTypes.DEFAULT_TYPE):
 
     if user_id in active_chats:
         partner_id = active_chats[user_id]
-        await context.bot.send_message(chat_id=partner_id, text=text)
+        await context.bot.send_message(partner_id, text)
+
+def end_chat(user1, user2):
+    active_chats.pop(user1, None)
+    active_chats.pop(user2, None)
+
+    users[user1]["status"] = "idle"
+    users[user2]["status"] = "idle"
 
 app = ApplicationBuilder().token(BOT_TOKEN).build()
 
