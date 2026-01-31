@@ -9,7 +9,7 @@ waiting_males = []
 waiting_females = []
 active_chats = {}
 
-FREE_CHAT_DURATION = 30  # 30 minutes in seconds
+FREE_CHAT_DURATION = 30*60  # 30 minutes in seconds
 
 async def start(update: Update, context: ContextTypes.DEFAULT_TYPE):
     keyboard = [["👦 Male", "👧 Female"]]
