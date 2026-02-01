@@ -1,5 +1,6 @@
 import asyncio
 import sqlite3
+from telegram.ext import PreCheckoutQueryHandlerfrom 
 from telegram import Update, ReplyKeyboardMarkup, LabeledPrice
 from telegram.ext import (
     ApplicationBuilder,
@@ -271,6 +272,10 @@ async def stats(update: Update, context: ContextTypes.DEFAULT_TYPE):
         f"⭐ Paid users (session-based): {paid_users}"
     )
 
+async def precheckout_callback(update: Update, context: ContextTypes.DEFAULT_TYPE):
+    await update.pre_checkout_query.answer(ok=True)
+
+
 
 # ================== APP ==================
 app = ApplicationBuilder().token(BOT_TOKEN).build()
@@ -287,6 +292,7 @@ app.add_handler(
     )
 )
 app.add_handler(CommandHandler("stats", stats))
+app.add_handler(PreCheckoutQueryHandler(precheckout_callback))
 app.add_handler(MessageHandler(filters.SUCCESSFUL_PAYMENT, successful_payment))
 app.add_handler(MessageHandler(filters.TEXT & ~filters.COMMAND, relay_messages))
 
