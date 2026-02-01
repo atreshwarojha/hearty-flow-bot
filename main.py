@@ -1,6 +1,5 @@
 import asyncio
 import sqlite3
-from telegram.ext import PreCheckoutQueryHandlerfrom 
 from telegram import Update, ReplyKeyboardMarkup, LabeledPrice
 from telegram.ext import (
     ApplicationBuilder,
@@ -8,7 +7,9 @@ from telegram.ext import (
     MessageHandler,
     ContextTypes,
     filters,
+    PreCheckoutQueryHandler,
 )
+
 
 # ================== CONFIG ==================
 BOT_TOKEN = "8335740705:AAFeYZinoZ3rN-_l1rW7y4DUsyWJzhvhcLI"
