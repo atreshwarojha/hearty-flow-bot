@@ -183,7 +183,7 @@ async def handle_paid_choice(update: Update, context: ContextTypes.DEFAULT_TYPE)
     chat_id = update.effective_chat.id
     text = update.message.text
 
-    if text == "⭐ 50 Stars – 30 minutes":
+    if "30" in text and "Stars" in text:
         await context.bot.send_invoice(
             chat_id=chat_id,
             title="30 Minute Chat",
@@ -193,7 +193,7 @@ async def handle_paid_choice(update: Update, context: ContextTypes.DEFAULT_TYPE)
             prices=[LabeledPrice("30 min chat", 50)],
         )
 
-    elif text == "⭐ 90 Stars – 60 minutes":
+    elif "60" in text and "Stars" in text:
         await context.bot.send_invoice(
             chat_id=chat_id,
             title="60 Minute Chat",
@@ -286,12 +286,11 @@ app.add_handler(MessageHandler(filters.Regex("^(👦 Male|👧 Female)$"), handl
 app.add_handler(MessageHandler(filters.Regex("^🔍 Find a chat partner$"), find_match))
 app.add_handler(
     MessageHandler(
-        filters.Regex(
-            "^(⭐ 50 Stars – 30 minutes|⭐ 90 Stars – 60 minutes|❌ End chat)$"
-        ),
+        filters.TEXT & ~filters.COMMAND,
         handle_paid_choice
     )
 )
+
 app.add_handler(CommandHandler("stats", stats))
 app.add_handler(PreCheckoutQueryHandler(precheckout_callback))
 app.add_handler(MessageHandler(filters.SUCCESSFUL_PAYMENT, successful_payment))
