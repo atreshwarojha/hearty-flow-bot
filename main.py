@@ -251,6 +251,27 @@ async def start_paid_chat(user1, user2, context):
         end_chat_after_time(user1, user2, context, duration)
     )
 
+async def stats(update: Update, context: ContextTypes.DEFAULT_TYPE):
+    if update.effective_user.id != 1768530708:
+        await update.message.reply_text("Unauthorized.")
+        return
+
+    cursor.execute("SELECT COUNT(*) FROM users")
+    total_users = cursor.fetchone()[0]
+
+    cursor.execute("SELECT COUNT(*) FROM users WHERE free_used = 1")
+    free_used = cursor.fetchone()[0]
+
+    paid_users = len(paid_time_balance)
+
+    await update.message.reply_text(
+        f"📊 Bot Stats\n\n"
+        f"👤 Total users: {total_users}\n"
+        f"🆓 Free chats used: {free_used}\n"
+        f"⭐ Paid users (session-based): {paid_users}"
+    )
+
+
 # ================== APP ==================
 app = ApplicationBuilder().token(BOT_TOKEN).build()
 
@@ -265,6 +286,7 @@ app.add_handler(
         handle_paid_choice
     )
 )
+app.add_handler(CommandHandler("stats", stats))
 app.add_handler(MessageHandler(filters.SUCCESSFUL_PAYMENT, successful_payment))
 app.add_handler(MessageHandler(filters.TEXT & ~filters.COMMAND, relay_messages))
 
