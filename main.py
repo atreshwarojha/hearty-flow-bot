@@ -12,7 +12,7 @@ from telegram.ext import (
     filters
 )
 
-BOT_TOKEN = "PASTE_YOUR_BOT_TOKEN_HERE"
+BOT_TOKEN = "8335740705:AAFeYZinoZ3rN-_l1rW7y4DUsyWJzhvhcLI"
 
 # --------- GLOBAL STATE (in-memory) ----------
 users = {}
