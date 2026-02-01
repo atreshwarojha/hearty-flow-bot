@@ -180,27 +180,19 @@ def end_chat(user1, user2):
 
 # ================== STARS PAYMENT ==================
 async def handle_paid_choice(update: Update, context: ContextTypes.DEFAULT_TYPE):
-    chat_id = update.effective_chat.id
     text = update.message.text
 
+    await update.message.reply_text("DEBUG: button received")  # 👈 ADD THIS
+
     if "30" in text and "Stars" in text:
+        await update.message.reply_text("DEBUG: sending 30-min invoice")  # 👈 ADD
         await context.bot.send_invoice(
-            chat_id=chat_id,
+            chat_id=update.effective_chat.id,
             title="30 Minute Chat",
             description="Continue chatting anonymously",
             payload="STARS_30",
             currency="XTR",
             prices=[LabeledPrice("30 min chat", 50)],
-        )
-
-    elif "60" in text and "Stars" in text:
-        await context.bot.send_invoice(
-            chat_id=chat_id,
-            title="60 Minute Chat",
-            description="Continue chatting anonymously",
-            payload="STARS_60",
-            currency="XTR",
-            prices=[LabeledPrice("60 min chat", 90)],
         )
 
 # ================== PAYMENT SUCCESS ==================
