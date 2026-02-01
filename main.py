@@ -107,7 +107,7 @@ async def find_match(update: Update, context: ContextTypes.DEFAULT_TYPE):
         else:
             waiting_males.append(user_id)
             await update.message.reply_text("⏳ Waiting for a female partner…")
-    else:
+    else:  # female
         if waiting_males:
             partner = waiting_males.pop(0)
             await start_chat(partner, user_id, context)
